@@ -75,5 +75,28 @@ public class OrderRepository {
         ).getResultList();
     }
 
+    public List<Order> findAllWithItem() {
+        // 참고 : 일대다의 경우 페치 조인을 사용하면 페이징을 할 수 없음
+        //       메모리에서 페이징을 하기 때문에 절대 사용하면 안된다.
 
+        // 참고 : 컬렉션 페치 조인은 1개만 사용할 수 있다. 사용하면 데이터가
+        //       부정합하게 조회될 수 있다.
+        return em.createQuery(
+                        "select distinct o from Order o" +
+                                " join fetch o.member m" +
+                                " join fetch o.delivery d" +
+                                " join fetch o.orderItems oi" +
+                                " join fetch oi.item i", Order.class)
+                .getResultList();
+    }
+
+    public List<Order> findAllWithMemberDelivery(int offset, int limit) {
+        return em.createQuery(
+                        "select o from Order o" +
+                                " join fetch o.member m " +
+                                " join fetch o.delivery d", Order.class)
+                .setFirstResult(offset)
+                .setMaxResults(limit)
+                .getResultList();
+    }
 }
